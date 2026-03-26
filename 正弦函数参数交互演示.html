@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正弦函数参数交互演示：y = A sin(ωx + φ)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Microsoft+YaHei&family=Segoe+UI:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-blue: #0A2472;
+            --accent-orange: #FF715B;
+            --light-bg: #F5F5F5;
+            --dark-text: #333333;
+            --medium-blue: #2A4B8C;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--medium-blue) 100%);
+            color: var(--white);
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .title {
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 300;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .function-display {
+            font-family: 'Cambria', 'Times New Roman', serif;
+            font-size: 1.6rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-orange);
+            color: var(--primary-blue);
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+        }
+        
+        .content-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .control-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f9fafc;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--accent-orange);
+        }
+        
+        .control-panel h2 {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+        
+        .control-value {
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+        
+        .slider-container {
+            width: 100%;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, var(--primary-blue), var(--medium-blue));
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-description {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .visualization-container {
+            flex: 1.5;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .graph-container, .physics-container {
+            background-color: #f9fafc;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .graph-container h2, .physics-container h2 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+        
+        #mathCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background-color: var(--white);
+            display: block;
+        }
+        
+        .physics-simulation {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .spring-setup {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 160px;
+        }
+        
+        .ceiling {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #888;
+        }
+        
+        .spring {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 60px;
+            background-color: #666;
+        }
+        
+        .weight {
+            position: absolute;
+            top: 64px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #4a6bc2, var(--primary-blue));
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .equilibrium-line {
+            position: absolute;
+            top: 84px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.3);
+        }
+        
+        .parameter-display {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(90deg, rgba(10, 36, 114, 0.1) 0%, rgba(255, 113, 91, 0.1) 100%);
+            border-radius: 8px;
+        }
+        
+        .param-box {
+            text-align: center;
+        }
+        
+        .param-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        
+        .param-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .comparison-section {
+            background-color: #f9fafc;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .comparison-section h2 {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f0f4ff;
+        }
+        
+        .comparison-table tr:hover {
+            background-color: #e6ebff;
+        }
+        
+        .math-param {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+        
+        .physics-meaning {
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">正弦函数参数交互演示</h1>
+            <p class="subtitle">探究参数 A, ω, φ 对函数 y = A sin(ωx + φ) 图象的影响</p>
+        </header>
+        
+        <div class="function-display">
+            y = <span id="A-value">1</span> · sin( <span id="ω-value">1</span>x + <span id="φ-value">0</span> )
+        </div>
+        
+        <main class="main-content">
+            <div class="content-row">
+                <div class="control-panel">
+                    <h2>参数控制</h2>
+                    
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>振幅 A (Amplitude)</span>
+                            <span class="control-value" id="A-display">1.0</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="A-slider" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                        <p class="control-description">
+                            控制波形的垂直伸缩幅度。A 值越大，波峰和波谷距离平衡位置越远。
+                        </p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>角频率 ω (Angular Frequency)</span>
+                            <span class="control-value" id="ω-display">1.0</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="ω-slider" min="0.5" max="3" step="0.1" value="1">
+                        </div>
+                        <p class="control-description">
+                            控制波形的水平伸缩，决定振动的快慢。周期 T = 2π/ω，ω 越大，周期 T 越小，波形越密集。
+                        </p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>初相 φ (Initial Phase)</span>
+                            <span class="control-value" id="φ-display">0.0</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="φ-slider" min="0" max="6.28" step="0.1" value="0">
+                        </div>
+                        <p class="control-description">
+                            控制波形的水平平移，表示振动的初始位置。φ 值变化，整个波形会左右移动。
+                        </p>
+                    </div>
+                    
+                    <div class="parameter-display">
+                        <div class="param-box">
+                            <div class="param-value" id="current-A">1.0</div>
+                            <div class="param-label">振幅 (A)</div>
+                        </div>
+                        <div class="param-box">
+                            <div class="param-value" id="current-ω">1.0</div>
+                            <div class="param-label">角频率 (ω)</div>
+                        </div>
+                        <div class="param-box">
+                            <div class="param-value" id="current-φ">0.0</div>
+                            <div class="param-label">初相 (φ)</div>
+                        </div>
+                        <div class="param-box">
+                            <div class="param-value" id="current-T">6.28</div>
+                            <div class="param-label">周期 (T)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="visualization-container">
+                    <div class="graph-container">
+                        <h2>正弦函数图象</h2>
+                        <div class="canvas-container">
+                            <canvas id="mathCanvas" width="600" height="300"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="physics-container">
+                        <h2>物理模型：弹簧振子</h2>
+                        <div class="physics-simulation">
+                            <div class="spring-setup">
+                                <div class="ceiling"></div>
+                                <div class="spring" id="spring"></div>
+                                <div class="weight" id="weight"></div>
+                                <div class="equilibrium-line"></div>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 10px; font-size: 0.9rem;">
+                            当前参数：振幅 A = <span id="physics-A">1.0</span>，角频率 ω = <span id="physics-ω">1.0</span>，初相 φ = <span id="physics-φ">0.0</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-section">
+                <h2>参数变化规律总结</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>数学参数</th>
+                            <th>图象变化</th>
+                            <th>物理意义</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="math-param">振幅 A</span></td>
+                            <td>图象纵向伸缩 | 纵向振幅变化</td>
+                            <td><span class="physics-meaning">振动的幅度大小</span> | 能量大小</td>
+                        </tr>
+                        <tr>
+                            <td><span class="math-param">角频率 ω</span></td>
+                            <td>图象横向伸缩 | 周期 T=2π/ω 变化</td>
+                            <td><span class="physics-meaning">振动的快慢</span> | 频率高低</td>
+                        </tr>
+                        <tr>
+                            <td><span class="math-param">初相 φ</span></td>
+                            <td>图象水平平移 | 左右移动</td>
+                            <td><span class="physics-meaning">振动的初始位置</span> | 相位</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>交互式正弦函数参数演示 | 拖动滑块观察参数 A, ω, φ 对函数图象和物理模型的影响</p>
+        </footer>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const canvas = document.getElementById('mathCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const A_slider = document.getElementById('A-slider');
+        const ω_slider = document.getElementById('ω-slider');
+        const φ_slider = document.getElementById('φ-slider');
+        
+        const A_display = document.getElementById('A-display');
+        const ω_display = document.getElementById('ω-display');
+        const φ_display = document.getElementById('φ-display');
+        
+        const A_value = document.getElementById('A-value');
+        const ω_value = document.getElementById('ω-value');
+        const φ_value = document.getElementById('φ-value');
+        
+        const current_A = document.getElementById('current-A');
+        const current_ω = document.getElementById('current-ω');
+        const current_φ = document.getElementById('current-φ');
+        const current_T = document.getElementById('current-T');
+        
+        const physics_A = document.getElementById('physics-A');
+        const physics_ω = document.getElementById('physics-ω');
+        const physics_φ = document.getElementById('physics-φ');
+        
+        const weight = document.getElementById('weight');
+        const spring = document.getElementById('spring');
+        
+        // 初始化参数
+        let A = 1.0;
+        let ω = 1.0;
+        let φ = 0.0;
+        
+        // 动画相关变量
+        let time = 0;
+        let animationId = null;
+        
+        // 更新所有显示值
+        function updateDisplays() {
+            A_display.textContent = A.toFixed(1);
+            ω_display.textContent = ω.toFixed(1);
+            φ_display.textContent = φ.toFixed(1);
+            
+            A_value.textContent = A.toFixed(1);
+            ω_value.textContent = ω.toFixed(1);
+            φ_value.textContent = φ.toFixed(1);
+            
+            current_A.textContent = A.toFixed(1);
+            current_ω.textContent = ω.toFixed(1);
+            current_φ.textContent = φ.toFixed(1);
+            current_T.textContent = (2 * Math.PI / ω).toFixed(2);
+            
+            physics_A.textContent = A.toFixed(1);
+            physics_ω.textContent = ω.toFixed(1);
+            physics_φ.textContent = φ.toFixed(1);
+        }
+        
+        // 绘制坐标系和正弦函数图象
+        function drawGraph() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制网格
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // 垂直网格线
+            for (let x = 0; x <= width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // 水平网格线
+            for (let y = 0; y <= height; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            
+            // x轴
+            ctx.beginPath();
+            ctx.moveTo(0, height/2);
+            ctx.lineTo(width, height/2);
+            ctx.stroke();
+            
+            // y轴
+            ctx.beginPath();
+            ctx.moveTo(width/2, 0);
+            ctx.lineTo(width/2, height);
+            ctx.stroke();
+            
+            // 绘制刻度
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            
+            // x轴刻度
+            for (let x = -width/2 + 40; x < width/2; x += 40) {
+                if (x !== 0) {
+                    const pixelX = width/2 + x;
+                    ctx.beginPath();
+                    ctx.moveTo(pixelX, height/2 - 5);
+                    ctx.lineTo(pixelX, height/2 + 5);
+                    ctx.stroke();
+                    
+                    const value = (x / 40) * Math.PI;
+                    ctx.fillText(value.toFixed(1) + 'π', pixelX, height/2 + 10);
+                }
+            }
+            
+            // y轴刻度
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let y = -height/2 + 40; y < height/2; y += 40) {
+                if (y !== 0) {
+                    const pixelY = height/2 - y;
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 5, pixelY);
+                    ctx.lineTo(width/2 + 5, pixelY);
+                    ctx.stroke();
+                    
+                    const value = (y / 40).toFixed(1);
+                    ctx.fillText(value, width/2 - 10, pixelY);
+                }
+            }
+            
+            // 标注坐标轴
+            ctx.fillStyle = 'var(--primary-blue)';
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            ctx.fillText('y', width/2 - 10, 10);
+            
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('x', width - 10, height/2 - 10);
+            
+            // 绘制正弦函数曲线
+            ctx.beginPath();
+            ctx.strokeStyle = 'var(--accent-orange)';
+            ctx.lineWidth = 3;
+            
+            for (let pixelX = 0; pixelX < width; pixelX++) {
+                // 将像素坐标转换为数学坐标
+                const x = (pixelX - width/2) / 40;
+                const y = A * Math.sin(ω * x + φ);
+                
+                // 将数学坐标转换为像素坐标
+                const pixelY = height/2 - y * 40;
+                
+                if (pixelX === 0) {
+                    ctx.moveTo(pixelX, pixelY);
+                } else {
+                    ctx.lineTo(pixelX, pixelY);
+                }
+            }
+            
+            ctx.stroke();
+            
+            // 绘制当前点（跟随时间变化）
+            const currentX = (time * ω) - φ;
+            const currentY = A * Math.sin(time * ω);
+            
+            const pixelX = width/2 + currentX * 40;
+            const pixelY = height/2 - currentY * 40;
+            
+            // 绘制当前点
+            ctx.beginPath();
+            ctx.arc(pixelX, pixelY, 8, 0, Math.PI * 2);
+            ctx.fillStyle = 'var(--primary-blue)';
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 绘制点到x轴的垂线
+            ctx.beginPath();
+            ctx.moveTo(pixelX, pixelY);
+            ctx.lineTo(pixelX, height/2);
+            ctx.strokeStyle = 'rgba(10, 36, 114, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 标注当前点坐标
+            ctx.fillStyle = 'var(--primary-blue)';
+            ctx.font = 'bold 12px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(`(${(currentX/ω).toFixed(1)}, ${currentY.toFixed(1)})`, pixelX, pixelY - 10);
+        }
+        
+        // 更新弹簧振子动画
+        function updatePhysicsAnimation() {
+            // 计算当前振子位置
+            const displacement = A * Math.sin(ω * time + φ);
+            
+            // 转换为像素位移 (A=1对应40px)
+            const pixelDisplacement = displacement * 40;
+            
+            // 更新振子位置
+            weight.style.transform = `translateX(-50%) translateY(${pixelDisplacement}px)`;
+            
+            // 更新弹簧长度
+            const springLength = 60 + pixelDisplacement;
+            spring.style.height = `${springLength}px`;
+            
+            // 更新时间
+            time += 0.05;
+        }
+        
+        // 动画循环
+        function animate() {
+            drawGraph();
+            updatePhysicsAnimation();
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        // 初始化滑块事件监听
+        function initSliders() {
+            A_slider.addEventListener('input', function() {
+                A = parseFloat(this.value);
+                updateDisplays();
+            });
+            
+            ω_slider.addEventListener('input', function() {
+                ω = parseFloat(this.value);
+                updateDisplays();
+            });
+            
+            φ_slider.addEventListener('input', function() {
+                φ = parseFloat(this.value);
+                updateDisplays();
+            });
+        }
+        
+        // 初始化
+        function init() {
+            updateDisplays();
+            initSliders();
+            animate();
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', init);
+        
+        // 页面卸载时停止动画
+        window.addEventListener('beforeunload', function() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        });
+    </script>
+</body>
+</html>
